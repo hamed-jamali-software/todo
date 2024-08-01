@@ -21,8 +21,8 @@
         });
     </script>
     <meta name="csrf-token" content="{{ csrf_token }}">
-    
-    
+
+
     {% block extra_js %}
 {{ form.media.js }}
 {% endblock %}
@@ -114,8 +114,8 @@
                                 <option value="none">None</option>
                                 <option value="daily">Daily</option>
 {#                                <option value="every_other_day">Every Other Day</option>#}
-{#                                <option value="weekly">Weekly</option>#}
-{#                                <option value="monthly">Monthly</option>#}
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -181,7 +181,7 @@
                 slotDuration: '00:30:00',
                 minTime: "05:00:00",
                 maxTime: "24:00:00",
-                height: 600,
+                height: 800,
                 allDaySlot: false,
                 selectable: true,
                 selectHelper: true,
@@ -190,12 +190,14 @@
                     $('#task-status').val(event.status);
                     $('#taskModal').modal('show');
                 },
-                
+
                 select: function(start, end, jsEvent, view) {
                 {#$('#id_title').val(start.format('YYYY-MM-DD HH:mm'));#}
                 $('#id_start_time').val(start.format('YYYY-MM-DD HH:mm'));
                 $('#previous_task').val('');
-                
+                $('#id_repeat').val('none');
+                {#$('#id_category').val('');#}
+
                 $('#taskModalCreate').modal('show');
                 },
                 eventRender: function(event, element) {
@@ -225,10 +227,10 @@
                     }
                 });
             });
-            
-            
+
+
             $('#taskCreateForm').on('submit', function(e) {
-                
+
                 e.preventDefault();
                 var formData = $(this).serialize();
                 $.ajax({
@@ -282,7 +284,7 @@
                 }
             }
         }
-            
+
             $(document).on('change', '#id_category', function() {
             updateDuration();
             updateColor();

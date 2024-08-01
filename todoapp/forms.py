@@ -9,8 +9,15 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = [
-            'title', 'description', 'start_time', 'end_time', 'duration',
-            'status', 'repeat', 'category', 'color'
+            'title',
+            'description',
+            'start_time',
+            'end_time',
+            'duration',
+            # 'status',
+            'repeat',
+            'category',
+            'color'
         ]
         widgets = {
             'start_time': DateTimePickerInput(
@@ -18,10 +25,10 @@ class TaskForm(forms.ModelForm):
                 attrs={"class": "start_time"},
 
             ),
-            'end_time': DateTimePickerInput(),
+            # 'end_time': DateTimePickerInput(),
             'color': forms.TextInput(attrs={'type': 'color'}),
             'duration': forms.Select(choices=[(15, '15 minutes'), (30, '30 minutes'), (60, '1 hour'), (120, '2 hours')]),
-            'description': forms.Textarea(attrs={'rows': 2}),
+            # 'description': forms.Textarea(attrs={'rows': 2}),
         }
 
 class CategoryForm(forms.ModelForm):

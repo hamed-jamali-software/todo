@@ -20,8 +20,8 @@ def calendar_view(request):
         events.append({
             'id': task.id,
             'title': task.title,
-            'start': task.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': task.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            'start': task.start_time.strftime('%Y-%m-%d %H:%M'),
+            'end': task.end_time.strftime('%Y-%m-%d %H:%M'),
             'color': task.color,
             'status': task.status,
         })
@@ -80,7 +80,15 @@ def create_repeated_tasks(task):
     interval = repeat_intervals.get(task.repeat, None)
     if interval:
         start_time = task.start_time
-        for i in range(1, 30):  # Create tasks for the next 30 occurrences
+        repeat_days = 0
+        if task.repeat == 'monthly':
+            repeat_days = 30
+        elif task.repeat == 'weekly':
+            repeat_days = 7
+        elif task.repeat == 'daily':
+            repeat_days = 1
+
+        for i in range(1, repeat_days):  # Create tasks for the next 30 occurrences
             start_time += interval
             Task.objects.create(
                 title=task.title,
