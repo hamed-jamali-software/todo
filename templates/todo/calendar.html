@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calendar</title>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+      <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            flatpickr("input[type=datetime-local]", {
+                dateFormat: "Y-m-d H:i",
+                enableTime: true,
+                time_24hr: true
+            });
+        });
+    </script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    
+    {% block extra_js %}
+{{ form.media.js }}
+{% endblock %}
+
+</head>
+<body>
+    <h1>Calendar</h1>
+    <div id="calendar"></div>
+
+    <!-- Modal for updating task status -->
+    <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalLabel">Update Task Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <input type="hidden" id="task-id" name="id">
+                        <div class="form-group">
+                            <label for="task-status">Status</label>
+                            <select class="form-control" id="task-status" name="status">
+                                <option value="pending">Pending</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for creating task -->
+    <div class="modal fade" id="taskModalCreate" tabindex="-1" role="dialog" aria-labelledby="taskModalCreateLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalCreateLabel">Create Task</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskCreateForm" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_title">Title</label>
+                            <input type="text" class="form-control" id="id_title" name="title">
+                        </div>
+{#                        <div class="form-group">#}
+{#                            <label for="id_description">Description</label>#}
+{#                            <textarea class="form-control" id="id_description" name="description" rows="2"></textarea>#}
+{#                        </div>#}
+                        <div class="form-group">
+                            <label for="id_start_time">Start Time</label>
+                            <input type="datetime-local" class="form-control" id="id_start_time" name="start_time">
+                        </div>
+{#                        <div class="form-group">#}
+{#                            <label for="id_end_time">End Time</label>#}
+{#                            <input type="datetime-local" class="form-control" id="id_end_time" name="end_time">#}
+{#                        </div>#}
+                        <div class="form-group">
+                            <label for="id_duration">Duration</label>
+                            <select name="duration" id="id_duration">
+                              <option value="15">15 minutes</option>
+                              <option value="30">30 minutes</option>
+                              <option value="60" selected="">1 hour</option>
+                              <option value="120">2 hours</option>
+                            </select>
+                        </div>
+{#                        <div class="form-group">#}
+{#                            <label for="id_status">Status</label>#}
+{#                            <select class="form-control" id="id_status" name="status">#}
+{#                                <option value="pending">Pending</option>#}
+{#                                <option value="in_progress">In Progress</option>#}
+{#                                <option value="completed">Completed</option>#}
+{#                                <option value="rejected">Rejected</option>#}
+{#                            </select>#}
+{#                        </div>#}
+                        <div class="form-group">
+                            <label for="id_repeat">Repeat</label>
+                            <select class="form-control" id="id_repeat" name="repeat">
+                                <option value="none">None</option>
+                                <option value="daily">Daily</option>
+{#                                <option value="every_other_day">Every Other Day</option>#}
+{#                                <option value="weekly">Weekly</option>#}
+{#                                <option value="monthly">Monthly</option>#}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_category">Category</label>
+                            <select class="form-control" id="id_category" name="category">
+                                {% for category in categories %}
+                                <option value="{{ category.pk }}" data-default-duration="{{ category.default_duration }}" data-color="{{ category.color }}">
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_color">Color</label>
+                            <input type="color" class="form-control" id="id_color" name="color">
+                        </div>
+                        <div class="form-group">
+                            <label for="previous_task">Previous Task</label>
+                            <select id="previous_task" class="form-control">
+                                <option value="">Select Previous Task</option>
+                                {% for task in previous_tasks %}
+                                <option value="{{ task.pk }}" data-end-time="{{ task.end_time|date:"Y-m-d\TH:i" }}">{{ task.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        $(document).ready(function() {
+            const events = {{ events|safe }};
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay,listWeek'
+                },
+                defaultView: 'agendaWeek',
+                editable: false,
+                events: events,
+                timeFormat: 'H:mm',
+                slotDuration: '00:30:00',
+                minTime: "05:00:00",
+                maxTime: "24:00:00",
+                height: 600,
+                allDaySlot: false,
+                selectable: true,
+                selectHelper: true,
+                eventClick: function(event) {
+                    $('#task-id').val(event.id);
+                    $('#task-status').val(event.status);
+                    $('#taskModal').modal('show');
+                },
+                
+                select: function(start, end, jsEvent, view) {
+                {#$('#id_title').val(start.format('YYYY-MM-DD HH:mm'));#}
+                $('#id_start_time').val(start.format('YYYY-MM-DD HH:mm'));
+                $('#previous_task').val('');
+                
+                $('#taskModalCreate').modal('show');
+                },
+                eventRender: function(event, element) {
+                    if (moment(event.end).isBefore(moment())) {
+                        element.css('opacity', '0.5');
+                    }
+                }
+            });
+
+            $('#taskForm').on('submit', function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                var taskId = $('#task-id').val();
+                $.ajax({
+                    url: '/tasks/task/' + taskId + '/updatecalendar/',
+                    type: 'POST',
+                    data: formData,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                    },
+                    success: function(response) {
+                        $('#calendar').fullCalendar('refetchEvents');
+                        $('#taskModal').modal('hide');
+                    },
+                    error: function(response) {
+                        alert('There was an error while submitting the form.');
+                    }
+                });
+            });
+            
+            
+            $('#taskCreateForm').on('submit', function(e) {
+                
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '{% url "task_create" %}',
+                    type: 'POST',
+                    data: formData,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                    },
+                    success: function(response) {
+                        $('#calendar').fullCalendar('refetchEvents');
+                        $('#taskModalCreate').modal('hide');
+                    },
+                    error: function(response) {
+                        alert('There was an error while submitting the form.');
+                    }
+                });
+            });
+
+            function updateDuration() {
+            const categorySelect = $('select[name="category"]');
+            const durationField = $('select[name="duration"]');
+            const selectedCategory = categorySelect.find('option:selected');
+            const defaultDuration = selectedCategory.data('default-duration');
+
+                if (defaultDuration) {
+                    durationField.val(defaultDuration);
+                }
+            }
+
+        function updateColor() {
+            const categorySelect = $('select[name="category"]');
+            const colorField = $('input[name="color"]');
+            if (categorySelect && colorField) {
+                const selectedCategory = categorySelect.find('option:selected');
+                const categoryColor = selectedCategory.data('color');
+                if (categoryColor) {
+                    colorField.val(categoryColor);
+                }
+            }
+        }
+
+        function setPreviousTaskEndTime() {
+            const previousTaskSelect = $('#previous_task');
+            const startTimeField = $('input[name="start_time"]');
+            if (previousTaskSelect && startTimeField) {
+                const selectedTask = previousTaskSelect.find('option:selected');
+                const previousEndTime = selectedTask.data('end-time');
+                if (previousEndTime) {
+                    startTimeField.val(previousEndTime);
+                }
+            }
+        }
+            
+            $(document).on('change', '#id_category', function() {
+            updateDuration();
+            updateColor();
+        });
+
+        $(document).on('change', '#previous_task', setPreviousTaskEndTime);
+
+        updateDuration();  // Initialize duration field on page load
+        updateColor();  // Initialize color field on page load
+        });
+    </script>
+
+</body>
+</html>

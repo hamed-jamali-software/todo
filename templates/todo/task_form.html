@@ -1,0 +1,117 @@
+{% extends "todo/base.html" %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update Task,Create Task" }}{% endblock %}
+
+
+
+{% block extra_js %}
+{{ form.media.js }}
+{% endblock %}
+
+
+
+{% block content %}
+<h1>{{ form.instance.pk|yesno:"Update Task,Create Task" }}</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_title">Title</label>
+        {{ form.title }}
+    </div>
+    <div class="form-group">
+        <label for="id_description">Description</label>
+        {{ form.description }}
+    </div>
+    <div class="form-group">
+        <label for="id_start_time">Start Time</label>
+        {{ form.start_time }}
+    </div>
+    <div class="form-group">
+        <label for="id_end_time">End Time</label>
+        {{ form.end_time }}
+    </div>
+    <div class="form-group">
+        <label for="id_duration">Duration</label>
+        {{ form.duration }}
+    </div>
+    <div class="form-group">
+        <label for="id_status">Status</label>
+        {{ form.status }}
+    </div>
+    <div class="form-group">
+        <label for="id_repeat">Repeat</label>
+        {{ form.repeat }}
+    </div>
+    <div class="form-group">
+        <label for="id_category">Category</label>
+        {{ form.category }}
+    </div>
+    <div class="form-group">
+        <label for="id_color">Color</label>
+        {{ form.color }}
+    </div>
+    <div class="form-group">
+        <label for="previous_task">Previous Task</label>
+        <select id="previous_task" class="form-control">
+            <option value="">Select Previous Task</option>
+            {% for task in previous_tasks %}
+            <option value="{{ task.pk }}" data-end-time="{{ task.end_time|date:"Y-m-d\TH:i" }}">{{ task.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+<script>
+function updateDuration() {
+    
+    const categorySelect = document.querySelector('select[name="category"]');
+    const durationField = document.querySelector('select[name="duration"]');
+    const selectedCategory = categorySelect.options[categorySelect.selectedIndex];
+    const defaultDuration = selectedCategory.getAttribute('data-default-duration');
+    
+    if (defaultDuration) {
+        durationField.value = defaultDuration;
+    }
+}
+
+function updateColor() {
+    const categorySelect = document.querySelector('select[name="category"]');
+    const colorField = document.querySelector('input[name="color"]');
+    const selectedCategory = categorySelect.options[categorySelect.selectedIndex];
+    const categoryColor = selectedCategory.getAttribute('data-color');
+
+    if (categoryColor) {
+        colorField.value = categoryColor;
+    }
+}
+
+function setPreviousTaskEndTime() {
+    const previousTaskSelect = document.getElementById('previous_task');
+    const startTimeField = document.querySelector('input[class="start_time form-control input"]');
+    const selectedTask = previousTaskSelect.options[previousTaskSelect.selectedIndex];
+    const previousEndTime = selectedTask.getAttribute('data-end-time');
+
+    if (previousEndTime) {
+        startTimeField.value = previousEndTime;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.querySelector('select[name="category"]');
+    categorySelect.addEventListener('change', function() {
+        updateDuration();
+        updateColor();
+    });
+
+    const previousTaskSelect = document.getElementById('previous_task');
+    previousTaskSelect.addEventListener('change', setPreviousTaskEndTime);
+
+    updateDuration();  // Initialize duration field on page load
+    updateColor();  // Initialize color field on page load
+});
+</script>
+ 
+ 
+{% endblock %}
+ 

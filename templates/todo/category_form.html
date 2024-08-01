@@ -1,0 +1,23 @@
+{% extends "todo/base.html" %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update Category,Create Category" }}{% endblock %}
+
+{% block content %}
+<h1>{{ form.instance.pk|yesno:"Update Category,Create Category" }}</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_name">Name</label>
+        {{ form.name }}
+    </div>
+    <div class="form-group">
+        <label for="id_color">Color</label>
+        {{ form.color }}
+    </div>
+    <div class="form-group">
+        <label for="id_default_duration">Default Duration</label>
+        {{ form.default_duration }}
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}
