@@ -48,6 +48,22 @@
             top: -6px;
             z-index: 5;
         }
+        .event-status {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status-pending::after {
+            content: '🕒'; /* Emoji for pending */
+        }
+        .status-in-progress::after {
+            content: '⏳'; /* Emoji for in-progress */
+        }
+        .status-completed::after {
+            content: '✔️'; /* Emoji for completed */
+        }
+        .status-rejected::after {
+            content: '❌'; /* Emoji for rejected */
+        }
       
     </style>
 
@@ -230,8 +246,12 @@
                 $('#taskModalCreate').modal('show');
                 },
                 eventRender: function(event, element) {
+                    // Add status icon based on event status
+                    const statusClass = `status-${event.status.replace('_', '-')}`;
+                    element.find('.fc-title').append(`<span class="event-status ${statusClass}"></span>`);
+                    
                     if (moment(event.end).isBefore(moment())) {
-                        element.css('opacity', '0.5');
+                        element.css('opacity', '0.4');
                     }
                 }
             });
