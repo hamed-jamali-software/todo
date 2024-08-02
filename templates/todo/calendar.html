@@ -1,75 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Calendar</title>
- 
 
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
+{% extends "todo/base.html" %}
 
-
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-      <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            flatpickr("input[type=datetime-local]", {
-                dateFormat: "Y-m-d H:i",
-                enableTime: true,
-                time_24hr: true
-            });
-        });
-    </script>
-    <meta name="csrf-token" content="{{ csrf_token }}">
+{% block title %}Calendar{% endblock %}
 
 
     {% block extra_js %}
-{{ form.media.js }}
-{% endblock %}
+    {{ form.media.js }}
+    {% endblock %}
 
-    <style>
-        .fc-now-indicator-line {
-            border-top: 2px solid red;
-            z-index: 4;
-        }
-        .fc-now-indicator-arrow {
-            border-color: transparent red transparent transparent;
-            border-style: solid;
-            border-width: 8px;
-            height: 0;
-            width: 0;
-            position: absolute;
-            left: -8px;
-            top: -6px;
-            z-index: 5;
-        }
-        .event-status {
-            display: inline-block;
-            margin-left: 10px;
-        }
-        .status-pending::after {
-            content: '🕒'; /* Emoji for pending */
-        }
-        .status-in-progress::after {
-            content: '⏳'; /* Emoji for in-progress */
-        }
-        .status-completed::after {
-            content: '✔️'; /* Emoji for completed */
-        }
-        .status-rejected::after {
-            content: '❌'; /* Emoji for rejected */
-        }
-      
-    </style>
+{% block content %}
 
-</head>
-<body>
-    <h1>Calendar</h1>
+ 
     <div id="calendar"></div>
 
     <!-- Modal for updating task status -->
@@ -230,6 +171,8 @@
                 allDaySlot: false,
                 selectable: true,
                 selectHelper: true,
+                nowIndicator: true,
+                timezone: 'Europe/Berlin',
                 eventClick: function(event) {
                     $('#task-id').val(event.id);
                     $('#task-status').val(event.status);
@@ -258,16 +201,14 @@
             
                         // Adding the now indicator
             function updateNowIndicator() {
-                let now = new Date();
-                let nowIndicator = $('<div class="fc-now-indicator-line"></div><div class="fc-now-indicator-arrow"></div>');
-                let $timeGrid = $('.fc-slats');
-                let $times = $timeGrid.find('tbody tr');
-                let timeHeight = $times.first().outerHeight();
-                let minutes = now.getHours() * 60 + now.getMinutes();
-                let top = (minutes / 60) * timeHeight;
+                let now = new Date() ;
+                let $timeGrid = $('.fc-time-grid');
+                let minutes = (now.getHours() * 60 + now.getMinutes()-171)   ;
+                let top = (minutes / (24 * 60)) * $timeGrid.height();
 
+                let nowIndicator = $('<div class="fc-now-indicator-line"></div><div class="fc-now-indicator-arrow"></div>');
                 nowIndicator.css('top', top + 'px');
-                $timeGrid.find('.fc-now-indicator-line, .fc-now-indicator-arrow').remove();
+                {#$timeGrid.find('.fc-now-indicator-line, .fc-now-indicator-arrow').remove();#}
                 $timeGrid.append(nowIndicator);
             }
 
@@ -365,5 +306,5 @@
         });
     </script>
 
-</body>
-</html>
+{% endblock %}
+ 
