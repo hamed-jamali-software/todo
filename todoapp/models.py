@@ -21,10 +21,12 @@ DURATION_CHOICES = [
 # Choices for task repetition
 REPEAT_CHOICES = [
     ('none', 'None'),
-    ('daily', 'Daily'),
-    ('every_other_day', 'Every Other Day'),
-    ('weekly', 'Weekly'),
-    ('monthly', 'Monthly'),
+    ('2days', 'today and tomorrow'),
+    ('3days', 'Every day for 3 days'),
+    ('aweek', 'Every day for a week'),
+    ('amonth', 'Every day for a month'),
+    ('once-aweek', 'Once a week for a month'),
+
 ]
 
 class Category(models.Model):

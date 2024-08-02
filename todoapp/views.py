@@ -38,13 +38,14 @@ def task_update_calendar(request, pk):
         status = request.POST.get('status')
         task.status = status
         task.save()
+        update_task_statuses()
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
 
 def task_list(request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.all().order_by('start_time')
     return render(request, 'todo/task_list.html', {'tasks': tasks})
 
 def task_create(request, start_time=None):
@@ -72,21 +73,26 @@ def task_create(request, start_time=None):
 
 def create_repeated_tasks(task):
     repeat_intervals = {
-        'daily': timedelta(days=1),
-        'every_other_day': timedelta(days=2),
-        'weekly': timedelta(weeks=1),
-        'monthly': timedelta(weeks=4),
+        'aweek': timedelta(days=1),
+        '3days': timedelta(days=1),
+        '2days': timedelta(days=1),
+        'amonth': timedelta(days=1),
+        'once-aweek': timedelta(weeks=1),
     }
     interval = repeat_intervals.get(task.repeat, None)
     if interval:
         start_time = task.start_time
         repeat_days = 0
-        if task.repeat == 'monthly':
-            repeat_days = 30
-        elif task.repeat == 'weekly':
+        if task.repeat == 'aweek':
             repeat_days = 7
-        elif task.repeat == 'daily':
-            repeat_days = 1
+        elif task.repeat == '3days':
+            repeat_days = 3
+        elif task.repeat == '2days':
+            repeat_days = 2
+        elif task.repeat == 'amonth':
+            repeat_days = 30
+        elif task.repeat == 'once-aweek':
+            repeat_days = 4
 
         for i in range(1, repeat_days):  # Create tasks for the next 30 occurrences
             start_time += interval
