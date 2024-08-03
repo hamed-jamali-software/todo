@@ -45,8 +45,26 @@ def task_update_calendar(request, pk):
 
 
 def task_list(request):
-    tasks = Task.objects.all().order_by('start_time')
-    return render(request, 'todo/task_list.html', {'tasks': tasks})
+    today = timezone.now().date()
+    day_filter = request.GET.get('day')
+
+    # Task.objects.filter(start_time__date=now.date()).order_by('-end_time')
+    not_filter = False
+    if day_filter == 'yesterday':
+        start_date = today - timedelta(days=1)
+    elif day_filter == 'tomorrow':
+        start_date = today + timedelta(days=1)
+    elif day_filter == 'today':
+        start_date = today
+    else:
+        not_filter = True
+
+    if not_filter:
+        tasks = Task.objects.all().order_by('start_time')
+    else:
+        tasks = Task.objects.filter(start_time__date=start_date).order_by('start_time')
+
+    return render(request, 'todo/task_list.html', {'tasks': tasks, 'current_day': day_filter})
 
 def task_create(request, start_time=None):
     now = timezone.now()

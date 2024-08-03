@@ -203,17 +203,17 @@
             function updateNowIndicator() {
                 let now = new Date() ;
                 let $timeGrid = $('.fc-time-grid');
-                let minutes = (now.getHours() * 60 + now.getMinutes()-171)   ;
+                let minutes = (now.getHours() * 60 + now.getMinutes())   ;
                 let top = (minutes / (24 * 60)) * $timeGrid.height();
 
                 let nowIndicator = $('<div class="fc-now-indicator-line"></div><div class="fc-now-indicator-arrow"></div>');
-                nowIndicator.css('top', top + 'px');
+                {#nowIndicator.css('top', top + 'px');#}
                 {#$timeGrid.find('.fc-now-indicator-line, .fc-now-indicator-arrow').remove();#}
                 $timeGrid.append(nowIndicator);
             }
 
-            setInterval(updateNowIndicator, 60000); // Update every minute
-            updateNowIndicator();
+            {#setInterval(updateNowIndicator, 60000); // Update every minute#}
+            {#updateNowIndicator();#}
 
             $('#taskForm').on('submit', function(e) {
                 e.preventDefault();
@@ -229,6 +229,7 @@
                     success: function(response) {
                         $('#calendar').fullCalendar('refetchEvents');
                         $('#taskModal').modal('hide');
+                        window.location.reload();
                     },
                     error: function(response) {
                         alert('There was an error while submitting the form.');

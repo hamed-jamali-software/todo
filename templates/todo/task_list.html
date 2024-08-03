@@ -4,18 +4,23 @@
 
 {% block content %}
 <h1 class="mb-4">Task List</h1>
-<a href="{% url 'task_create' %}" class="btn btn-primary mb-3">Create Task</a>
+<div class="mb-3">
+    <a href="{% url 'task_create' %}" class="btn btn-primary">Create Task</a>
+    <a href="?day=today" class="btn btn-secondary {% if current_day == 'today' %}active{% endif %}">Today</a>
+    <a href="?day=yesterday" class="btn btn-secondary {% if current_day == 'yesterday' %}active{% endif %}">Yesterday</a>
+    <a href="?day=tomorrow" class="btn btn-secondary {% if current_day == 'tomorrow' %}active{% endif %}">Tomorrow</a>
+</div>
 <ul class="list-group">
     {% for task in tasks %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
+    <li class="list-group-item d-flex justify-content-between align-items-center task-item {{ task.status|lower }}">
         <div>
             <span class="task-color" style="background-color: {{ task.color }}"></span>
             <strong>{{ task.title }}</strong>
             <div>Start time: {{ task.start_time }}</div>
             <div>End time: {{ task.end_time }}</div>
             <div>Category: {{ task.category.name }}</div>
-            <div>Status: {{ task.get_status_display }}</div>
-            <div>Time left: <span id="time-left-{{ task.pk }}"></span></div>
+            <div class="status">{{ task.get_status_display }}</div>
+            <div id="time-left-{{ task.pk }}"></div>
         </div>
         <div>
             <a href="{% url 'task_update' task.pk %}" class="btn btn-warning btn-sm">Edit</a>
@@ -50,4 +55,37 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(updateTimeLeft, 1000);
 });
 </script>
+
+<style>
+.task-item {
+    position: relative;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5); /* تغییر رنگ پس‌زمینه و اوپاسیتی */
+}
+
+.task-item.pending {
+    background-color: rgba(128, 128, 128, 0.5); /* رنگ خاکستری برای وضعیت Pending */
+}
+
+.task-item.in_progress {
+    background-color: rgba(255, 165, 0, 0.5); /* رنگ نارنجی برای وضعیت In Progress */
+}
+
+.task-item.completed {
+    background-color: rgba(0, 128, 0, 0.5); /* رنگ سبز برای وضعیت Completed */
+}
+
+.task-item.rejected {
+    background-color: rgba(255, 0, 0, 0.5); /* رنگ قرمز برای وضعیت Rejected */
+}
+
+.status {
+    padding: 5px;
+    border-radius: 3px;
+}
+</style>
+
 {% endblock %}
