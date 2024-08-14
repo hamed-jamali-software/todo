@@ -153,18 +153,26 @@
 
         $(document).ready(function() {
             const events = {{ events|safe }};
+            const scrolltime = moment().subtract(1, 'hours').format('HH:mm:ss');
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay,listWeek'
+                    right: 'threeDay,month,agendaWeek,agendaDay,listWeek'
                 },
-                defaultView: 'agendaWeek',
-                firstDay: 1,
+                views: {
+                    threeDay: {
+                        type: 'agenda',
+                        duration: { days: 3 },
+                        buttonText: '3 days'
+                    }
+                },
+                defaultView: 'threeDay',
+                firstDay: moment().subtract(1, 'days').day(),
                 editable: false,
                 events: events,
                 timeFormat: 'H:mm',
-                slotDuration: '00:30:00',
+                slotDuration: '00:15:00',
                 minTime: "05:00:00",
                 maxTime: "24:00:00",
                 height: 800,
@@ -172,6 +180,14 @@
                 selectable: true,
                 selectHelper: true,
                 nowIndicator: true,
+                scrollTime: scrolltime,
+                dayRender: function(date, cell) {
+                        // اگر روز شنبه یا یکشنبه باشد
+                    if (date.day() === 0 || date.day() === 6) {
+                        cell.css('background-color', '#FFDAB9'); // رنگ نارنجی کم‌رنگ
+                    }
+                },
+                
                 timezone: 'Europe/Berlin',
                 eventClick: function(event) {
                     $('#task-id').val(event.id);
@@ -188,14 +204,17 @@
 
                 $('#taskModalCreate').modal('show');
                 },
+                 
                 eventRender: function(event, element) {
                     // Add status icon based on event status
                     const statusClass = `status-${event.status.replace('_', '-')}`;
-                    element.find('.fc-title').append(`<span class="event-status ${statusClass}"></span>`);
+                    element.find('.fc-time').prepend(`<span class="event-status ${statusClass}"></span>`);
                     
                     if (moment(event.end).isBefore(moment())) {
                         element.css('opacity', '0.4');
                     }
+                    
+                    
                 }
             });
             
